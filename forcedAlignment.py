@@ -172,8 +172,8 @@ for path_wav in data_path.glob("*.wav"):
         print("Skipping: Audio is shorter than text")
         continue
 
-    #for i in range(1000):#len(char_probs)):
-    #    print(i * 10 * 4 / 1000, char_probs[i], char_list[i])
+    for i in range(1000):#len(char_probs)):
+        print(i * 10 * 4 / 1000, char_probs[i], char_list[i])
 
     #print(timings[-20:])
     #print(ground_truth[-20:])
@@ -207,7 +207,6 @@ for path_wav in data_path.glob("*.wav"):
                     min_avg = min(min_avg, char_probs[t:t + n].mean())
                     
             outfile.write(str(start) + " " + str(end) + " " + str(min_avg) + " | " + text[i] + '\n')
-
 
         if args.debug:                            
             char_max_list = np.array(train_args.char_list)[lpz.argmax(axis=-1)]

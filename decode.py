@@ -25,7 +25,7 @@ parser.add_argument('model_path')
 parser.add_argument('cmvn_path')
 parser.add_argument('data_path')
 parser.add_argument('output_path')
-parser.add_argument('--split', action='store_true', default=False)
+parser.add_argument('--split', type=int, default=None)
 parser.add_argument('--gpu', action='store_true', default=False)
 cmdargs = parser.parse_args()
 
@@ -108,13 +108,15 @@ for path_wav in data_path.glob("*.wav"):
         #with using_transform_config({'train': True}):
         full_feat = load_inputs_and_targets([("data", data)])[0][0]
 
-        if cmdargs.split:
+        if cmdargs.split is not None:
                 
             all_probs = []
-            for i in range(len(full_feat) // 16000 + 1):
-                feat = full_feat[i * 16000: (i + 1) * 16000]
+            for i in range(len(full_feat) // cmdargs.split + 1):
+                feat = full_feat[i * cmdargs.split: (i + 1) * cmdargs.split]
 
                 probs = recognize(model, feat)
+                probs = np.concatenate((probs, probs[-1:]), 0)
+                print(probs.shape)
                 all_probs.append(probs)
                 #exit(0)
         
