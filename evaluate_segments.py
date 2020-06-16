@@ -29,7 +29,7 @@ models = [
             ]
 models = ["tedlium_%s_lstm","tedlium_%s_transformer_tedlium_2","tedlium_%s_transformer_libri_2","gentle_%s","aeneas_%s","maus_%s"]#["tedlium_%s_transformer_tedlium_2","gentle_%s"]
 #models = ["tedlium_%s_lstm","gentle_%s"]#["tedlium_%s_transformer_tedlium_2","gentle_%s"]
-
+models=["gentle_%s"]
 with open(result / "metrics", "w") as o:
     o.write("      mean    median    std    <1s    <0.5s\n")
 
@@ -61,17 +61,6 @@ with open(result / "metrics", "w") as o:
                     diffs = np.array(diffs)
                     all_diffs.append(diffs)
 
-                    #print(path_wav.name, diffs.mean(), np.median(diffs), diffs.std())
 
             all_diffs = np.concatenate(all_diffs, 0)
             o.write(data_pack[0] + " " + model + " " + ("%.3f" % all_diffs.mean()) + " " + ("%.3f" % np.median(all_diffs)) + " " + ("%.3f" % all_diffs.std()) + " " + ("%.3f" % (all_diffs < 1).mean()) + " " + ("%.3f" % (all_diffs < 0.5).mean()) + "\n")
-#
-            #all_diffs = all_diffs[np.logical_and(0 < all_diffs, all_diffs < 2)]
-
-            #sns.distplot(all_diffs, hist=True, bins=100, norm_hist=True,label={"tedlium_%s_lstm": "ours", "gentle_%s": "gentle"}[model])
-       # plt.xlim(0,2)
-        #plt.legend()   
-        #plt.ylabel('Density')
-       # plt.xlabel('Error')
-        #plt.savefig("result/histo.svg") 
-        #exit(0)

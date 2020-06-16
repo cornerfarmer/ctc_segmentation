@@ -37,12 +37,11 @@ class AttrDict(dict):
         self.__dict__ = self
 
 def recognize(model, x):
-    prev = model.training
     model.eval()
+    # Apply encoder
     enc_output = model.encode(x).unsqueeze(0)
-    print(enc_output.shape)
+    # Apply ctc part
     lpz = model.ctc.log_softmax(enc_output)[0].cpu().numpy()
-    print(lpz.shape)
     return lpz
 
 
@@ -53,15 +52,10 @@ def recognize(model, x):
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False  # https://github.com/pytorch/pytorch/issues/6351
 
-logging.info('torch type check is disabled')
-# use deterministic computation or not
-
 model_path = cmdargs.model_path
 model_conf = None
-# read training config
 
 # load trained model parameters
-logging.info('reading model parameters from ' + model_path)
 model, train_args = load_trained_model(model_path)
 model.eval()
 args = AttrDict()
@@ -92,41 +86,39 @@ for path_wav in data_path.glob("*.wav"):
     output_file = output_path / (path_wav.name.replace(".wav", ".npz"))
     print("Predicting: " + path_wav.name)
 
+    # Compute fbanks features
     with open("tmp/wav.scp", "w+") as f:
-        f.write("file " + str(path_wav.resolve()))  # data/wav/german-speechdata-package-v2/test/2015-02-10-11-31-32_Kinect-Beam.wav crawl/tmp/test.wav
-
+        f.write("file " + str(path_wav.resolve())) 
     os.system("./fbanks.sh " + cmdargs.cmvn_path)
     print("Finished fbanks")
 
     load_inputs_and_targets = LoadInputsAndTargets(
         mode='asr', load_output=False, sort_in_input_length=False)
-        #preprocess_conf=train_args.preprocess_conf)
 
     with torch.no_grad():
+        # Load input frames
         data = {"input": [{"name": "input1", "feat": str(Path("tmp/feats.1.ark:5").resolve())}]}
-
-        #with using_transform_config({'train': True}):
         full_feat = load_inputs_and_targets([("data", data)])[0][0]
 
         if cmdargs.split is not None:
-                
+            # Split audio in multiple parts and decode each one individually                
             all_probs = []
             for i in range(len(full_feat) // cmdargs.split + 1):
                 feat = full_feat[i * cmdargs.split: (i + 1) * cmdargs.split]
 
                 probs = recognize(model, feat)
                 probs = np.concatenate((probs, probs[-1:]), 0)
-                print(probs.shape)
+
                 all_probs.append(probs)
-                #exit(0)
         
             probs = np.concatenate(all_probs, 0)
         else:
+            # Apply model to the whole audio
             probs = recognize(model, full_feat)
 
         print("Finished recog")
-        print(probs.shape)
 
+        # Move output to output dir
         tmp_path = Path("tmp/output.npz")
         np.savez(tmp_path, probs)
         shutil.move(tmp_path, output_file)

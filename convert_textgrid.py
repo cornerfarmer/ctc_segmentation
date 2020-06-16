@@ -14,8 +14,6 @@ data_path = Path(cmdargs.data_path)
 eval_path = Path(cmdargs.eval_path)
 
 for path_wav in data_path.glob("*.wav"):
-    if path_wav.name == "MichaelSpecter_2010.wav":
-        continue
     path_textgrid = eval_path / (path_wav.name.replace(".wav", ".TextGrid"))
     path_utts = data_path / (path_wav.name.replace(".wav", ".txt"))
 
@@ -24,7 +22,6 @@ for path_wav in data_path.glob("*.wav"):
 
     with open(path_utts, "r") as f:
         utts = f.readlines()
-
 
     with open(eval_path / (path_wav.name.replace(".wav", ".txt")), "w") as f:
         f.write("\n")

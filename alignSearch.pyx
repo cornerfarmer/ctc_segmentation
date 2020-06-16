@@ -13,13 +13,12 @@ def cython_fill_table(np.ndarray[np.float32_t, ndim=2] table, np.ndarray[np.floa
     cdef float prob_max = -1000000000
     cdef float lastMax 
     cdef int lastArgMax 
-    cdef int next_utt_index = 1
-    cdef int utt_offset = 0
     cdef np.ndarray[np.int_t, ndim=1] cur_offset = np.zeros([ground_truth.shape[1]], np.int) - 1
     cdef float max_lpz_prob 
     cdef float p 
     cdef int s
 
+    # Compute the mean offset between two window positions
     mean_offset = (lpz.shape[0] - table.shape[0]) / float(table.shape[1])
     print("Mean offset: " + str(mean_offset))
     lower_offset = int(mean_offset)
@@ -29,24 +28,25 @@ def cython_fill_table(np.ndarray[np.float32_t, ndim=2] table, np.ndarray[np.floa
     for c in range(table.shape[1]):   
 
         if c > 0:
-            #offset = higher_offset if offset_sum / float(c) < mean_offset else lower_offset
+            # Compute next window offset
             offset = min(max(0, lastArgMax - table.shape[0] // 2), min(higher_offset, (lpz.shape[0] - table.shape[0]) - offset_sum))
-            #print(offset, offset_sum, lpz.shape[0], table.shape[0], lpz.shape[0] - table.shape[0], lastArgMax - table.shape[0] // 2)
-            #print(c, lastArgMax, lastMax)
 
+            # Compute relative offset to previous columns
             for s in range(ground_truth.shape[1] - 1):
                 cur_offset[s + 1] = cur_offset[s] + offset
             cur_offset[0] = offset
 
+            # Apply offset and move window one step further
             offset_sum += offset
+
+        # Log offset
         offsets[c] = offset_sum
         lastArgMax = -1
         lastMax = 0
-
-        if c == utt_begin_indices[next_utt_index]:
-            utt_offset = offset_sum - offsets[utt_begin_indices[next_utt_index - 1]]
-
+        
+        # Go through all rows of the current column
         for t in range((1 if c == 0 else 0), table.shape[0]):
+            # Compute max switch probability
             switch_prob = prob_max
             max_lpz_prob = prob_max
             for s in range(ground_truth.shape[1]):
@@ -59,7 +59,7 @@ def cython_fill_table(np.ndarray[np.float32_t, ndim=2] table, np.ndarray[np.floa
 
                     max_lpz_prob = max(max_lpz_prob, lpz[t + offset_sum, ground_truth[c, s]])
 
-            #skip_prob = prob_max if t >= table.shape[0] - offset else (table[t + offset, c - 1] + argskip_prob)
+            # Compute stay probability
             if t - 1 < 0:
                 stay_prob = prob_max 
             elif c == 0:
@@ -67,47 +67,16 @@ def cython_fill_table(np.ndarray[np.float32_t, ndim=2] table, np.ndarray[np.floa
             else:
                 stay_prob = table[t - 1, c] + max(lpz[t + offset_sum, blank], max_lpz_prob)
 
+            # Use max of stay and switch prob
             table[t, c] = max(switch_prob, stay_prob)
-            #if c == utt_begin_indices[next_utt_index] and t + utt_offset < table.shape[0]:
-            #    table[t, c] = max(table[t, c], table[t + utt_offset, utt_begin_indices[next_utt_index - 1]] + argskip_prob * (utt_begin_indices[next_utt_index] - utt_begin_indices[next_utt_index - 1]))
-                
+                 
+            # Remember the row with the max prob
             if lastArgMax == -1 or lastMax < table[t, c]:
                 lastMax = table[t, c]
                 lastArgMax = t
 
-        if c == utt_begin_indices[next_utt_index]:
-            next_utt_index += 1
-            if next_utt_index >= utt_begin_indices.shape[0]:
-                next_utt_index = 0
-
+    # Return cell index with max prob in last column
     c = table.shape[1] - 1
     t = table[:, c].argmax()
     return t, c
 
-
-def cython_fill_chapter_end_table(np.ndarray[np.float32_t, ndim=2] table, np.ndarray[np.float32_t, ndim=2] lpz, np.ndarray[np.int_t, ndim=1] ground_truth, np.ndarray[np.int_t, ndim=2] non_space_chars, int blank):
-    cdef int c
-    cdef int t
-
-    table[0, 0] = 0
-    for c in range(table.shape[1]):
-        for t in range(table.shape[0]):
-            if c == 0:
-                table[t, c] = table[t - 1, c] + lpz[t, blank]
-                non_space_chars[t, c] = non_space_chars[t - 1, c]
-            elif t == 0:
-                if lpz[t, blank] > lpz[t, ground_truth[c - 1]]:
-                    table[t, c] = lpz[t, blank]
-                    non_space_chars[t, c] = 0
-                else:
-                    table[t, c] = lpz[t, ground_truth[c - 1]]
-                    non_space_chars[t, c] = 1
-            else:
-                if table[t - 1, c] + lpz[t, blank] > table[t - 1, c - 1] + lpz[t, ground_truth[c - 1]]:
-                    table[t, c] = table[t - 1, c] + lpz[t, blank]
-                    non_space_chars[t, c] = non_space_chars[t - 1, c]
-                else:
-                    table[t, c] = table[t - 1, c - 1] + lpz[t, ground_truth[c - 1]]
-                    non_space_chars[t, c] = non_space_chars[t - 1, c - 1] + 1
-
-    
