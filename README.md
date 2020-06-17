@@ -1,5 +1,6 @@
 # CTC segmentation
 
+Segment a given audio into utterances using a trained end-to-end ASR model.
 
 ## Setup
 
