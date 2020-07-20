@@ -73,3 +73,18 @@ Finally align / segment the audio. This step will apply our ctc segmentation alg
 ```
 python align.py exp/tedlium2_rnn/model.acc.best data/tedlium_dev eval/tedlium_dev_tedlium2_rnn
 ```
+
+# Reference
+
+This method was described in **CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition**:
+
+```
+@misc{ctcsegmentation,
+    title={CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition},
+    author={Ludwig Kürzinger and Dominik Winkelbauer and Lujun Li and Tobias Watzel and Gerhard Rigoll},
+    year={2020},
+    eprint={2007.09127},
+    archivePrefix={arXiv},
+    primaryClass={eess.AS}
+}
+```
