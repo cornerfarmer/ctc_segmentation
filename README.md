@@ -76,7 +76,7 @@ python align.py exp/tedlium2_rnn/model.acc.best data/tedlium_dev eval/tedlium_de
 
 # Reference
 
-This method was described in **CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition**:
+CTC-segmentation is described in **CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition** at https://arxiv.org/abs/2007.09127 
 
 ```
 @misc{ctcsegmentation,
