@@ -2,8 +2,9 @@
 
 Segment a given audio into utterances using a trained end-to-end ASR model.
 
-* This repository contains contains the source code used in the paper.
-* Maintained version of the CTC segmentation algorithm: https://github.com/lumaku/ctc-segmentation
+* This repository contains the source code used in the paper.
+* Maintained code of the CTC segmentation python package: https://github.com/lumaku/ctc-segmentation
+
 
 ## Setup
 
