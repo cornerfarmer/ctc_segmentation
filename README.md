@@ -2,6 +2,9 @@
 
 Segment a given audio into utterances using a trained end-to-end ASR model.
 
+* This repository contains contains the source code used in the paper.
+* Maintained version of the CTC segmentation algorithm: https://github.com/lumaku/ctc-segmentation
+
 ## Setup
 
 Install ESPnet (tested v0.7.0)
@@ -76,15 +79,27 @@ python align.py exp/tedlium2_rnn/model.acc.best data/tedlium_dev eval/tedlium_de
 
 # Reference
 
-CTC-segmentation is described in **CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition** at https://arxiv.org/abs/2007.09127 
+CTC-segmentation is described in **CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition** at https://doi.org/10.1007/978-3-030-60276-5_27 or in pre-print at https://arxiv.org/abs/2007.09127 
 
 ```
-@misc{ctcsegmentation,
-    title={CTC-Segmentation of Large Corpora for German End-to-end Speech Recognition},
-    author={Ludwig Kürzinger and Dominik Winkelbauer and Lujun Li and Tobias Watzel and Gerhard Rigoll},
-    year={2020},
-    eprint={2007.09127},
-    archivePrefix={arXiv},
-    primaryClass={eess.AS}
+@InProceedings{ctcsegmentation,
+author="K{\"u}rzinger, Ludwig
+and Winkelbauer, Dominik
+and Li, Lujun
+and Watzel, Tobias
+and Rigoll, Gerhard",
+editor="Karpov, Alexey
+and Potapova, Rodmonga",
+title="CTC-Segmentation of Large Corpora for German End-to-End Speech Recognition",
+booktitle="Speech and Computer",
+year="2020",
+publisher="Springer International Publishing",
+address="Cham",
+pages="267--278",
+abstract="Recent end-to-end Automatic Speech Recognition (ASR) systems demonstrated the ability to outperform conventional hybrid DNN/HMM ASR. Aside from architectural improvements in those systems, those models grew in terms of depth, parameters and model capacity. However, these models also require more training data to achieve comparable performance.",
+isbn="978-3-030-60276-5"
 }
 ```
+
+
+
