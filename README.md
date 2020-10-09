@@ -4,6 +4,7 @@ Segment a given audio into utterances using a trained end-to-end ASR model.
 
 * This repository contains the source code used in the paper.
 * Maintained code of the CTC segmentation python package: https://github.com/lumaku/ctc-segmentation
+* CTC segmentation has been integrated into the ESPnet toolkit as `espnet/bin/asr_align.py`, including an example recipe for TEDlium 2 and a small example demo.
 
 
 ## Setup
